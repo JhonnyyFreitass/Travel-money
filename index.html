@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Travel Money</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f1ff;--card:#fff;--tx:#1d1b3a;--mut:#6b6891;--bd:#dcd8f5;--b:#2563eb;--p:#7c3aed;--inp:#faf9ff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#13112b;--card:#1e1b3f;--tx:#eceaff;--mut:#a29fcc;--bd:#322e63;--inp:#17153a}}
+:root[data-theme="dark"]{--bg:#13112b;--card:#1e1b3f;--tx:#eceaff;--mut:#a29fcc;--bd:#322e63;--inp:#17153a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:560px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--b),var(--p));color:#fff;border-radius:20px;padding:16px;margin-bottom:14px}
+header h1{margin:0;font-size:22px}header p{margin:2px 0 0;font-size:13px;opacity:.85}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 10px;color:var(--p)}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
+input,select{width:100%;padding:11px;border:1px solid var(--bd);border-radius:12px;background:var(--inp);color:var(--tx);font-size:16px}
+.row{display:flex;gap:8px}.row>*{flex:1}.row>.s{flex:0 0 96px}
+button{border:0;border-radius:12px;padding:12px;font-size:15px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--b),var(--p));width:100%;margin-top:10px;cursor:pointer}
+button.g{background:transparent;color:var(--mut);border:1px solid var(--bd);width:auto;padding:4px 10px;margin:0;font-size:12px}
+.bar{height:14px;background:var(--inp);border:1px solid var(--bd);border-radius:99px;overflow:hidden;margin:10px 0 6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--b),var(--p));width:0;transition:width .5s}
+.big{font-size:26px;font-weight:700}.mut{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.cv{background:var(--inp);border:1px solid var(--bd);border-radius:12px;padding:10px}.cv b{display:block;font-size:16px}
+.cv span{font-size:11px;color:var(--mut)}
+.it{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--bd);font-size:14px}
+.prev{font-size:13px;color:var(--mut);margin-top:8px;min-height:18px}
+svg text{fill:var(--mut);font-size:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<svg width="52" height="52" viewBox="0 0 64 64" aria-label="Avião e planeta Terra"><circle cx="30" cy="36" r="22" fill="#fff" fill-opacity=".18" stroke="#fff" stroke-width="2.5"/><ellipse cx="30" cy="36" rx="9" ry="22" fill="none" stroke="#fff" stroke-width="2"/><path d="M8 36h44M12 24h36M12 48h36" stroke="#fff" stroke-width="2" fill="none"/><path d="M60 6 34 22l8 4 6 10 4-6 2-6z" fill="#fff" transform="translate(-2 -2)"/><path d="M46 14 34 24" stroke="#7c3aed" stroke-width="1.5"/></svg>
+<div><h1>Travel Money</h1><p>Sua meta de viagem em R$, CLP, US$ e €</p></div>
+</header>
+
+<div class="card">
+<h2>🎯 Minha meta</h2>
+<div class="row"><div><label>Valor da meta</label><input id="goal" type="number" inputmode="decimal" placeholder="0,00"></div>
+<div class="s"><label>Moeda</label><select id="goalCur"></select></div></div>
+<label>Conta bancária onde estou guardando</label>
+<input id="bank" type="text" placeholder="Ex.: Nubank – Caixinha viagem">
+<div class="bar"><i id="fill"></i></div>
+<div class="row" style="align-items:baseline"><div class="big" id="pct">0%</div><div class="mut" id="left" style="text-align:right"></div></div>
+</div>
+
+<div class="card">
+<h2>💰 Guardar dinheiro</h2>
+<div class="row"><div><label>Valor</label><input id="amt" type="number" inputmode="decimal" placeholder="0,00"></div>
+<div class="s"><label>Moeda</label><select id="cur"></select></div></div>
+<div class="prev" id="prev"></div>
+<button id="add">Adicionar depósito</button>
+</div>
+
+<div class="card">
+<h2>🌎 Total guardado</h2>
+<div class="mut" id="totals"></div>
+<div class="grid" id="conv"></div>
+</div>
+
+<div class="card">
+<h2>📈 Progresso</h2>
+<div id="chart"></div>
+</div>
+
+<div class="card">
+<h2>🧾 Depósitos</h2>
+<div id="list"></div>
+</div>
+
+<div class="card">
+<h2>💱 Cotação (1 US$ vale…)</h2>
+<div class="row"><div><label>Real (BRL)</label><input id="r_BRL" type="number" step="any"></div>
+<div><label>Peso chileno (CLP)</label><input id="r_CLP" type="number" step="any"></div>
+<div><label>Euro (EUR)</label><input id="r_EUR" type="number" step="any"></div></div>
+<p class="mut" id="rdate" style="margin:10px 0 0"></p>
+<p class="mut" style="margin:6px 0 0">Valores de referência de out/2026. Esta página não consegue buscar cotação sozinha: confira em um conversor (Google, Wise, XE) e atualize os campos acima; tudo é recalculado na hora.</p>
+</div>
+</div>
+<script>
+var CUR={BRL:["R$","pt-BR"],CLP:["$","es-CL"],USD:["US$","en-US"],EUR:["€","de-DE"]};
+var KEY="travelmoney_v1";
+var S={goal:0,goalCur:"BRL",bank:"",rates:{BRL:5.4,CLP:925,USD:1,EUR:0.86},rdate:"Referência aproximada, não é cotação ao vivo.",deps:[]};
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);for(var k in o)S[k]=o[k];}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function $(i){return document.getElementById(i);}
+function conv(a,f,t){return a/S.rates[f]*S.rates[t];}
+function fmt(v,c){var d=c==="CLP"?0:2;return CUR[c][0]+" "+v.toLocaleString(CUR[c][1],{minimumFractionDigits:d,maximumFractionDigits:d});}
+var opts=Object.keys(CUR).map(function(c){return "<option>"+c+"</option>";}).join("");
+$("goalCur").innerHTML=opts;$("cur").innerHTML=opts;
+$("goalCur").value=S.goalCur;$("goal").value=S.goal||"";$("bank").value=S.bank;
+["BRL","CLP","EUR"].forEach(function(c){$("r_"+c).value=S.rates[c];$("r_"+c).oninput=function(){var v=parseFloat(this.value);if(v>0){S.rates[c]=v;S.rdate="Cotação editada manualmente em "+new Date().toLocaleDateString("pt-BR")+".";save();render();}};});
+$("goal").oninput=function(){S.goal=parseFloat(this.value)||0;save();render();};
+$("goalCur").onchange=function(){S.goalCur=this.value;save();render();};
+$("bank").oninput=function(){S.bank=this.value;save();};
+function preview(){var a=parseFloat($("amt").value),c=$("cur").value;
+if(!(a>0)){$("prev").textContent="";return;}
+$("prev").textContent="≈ "+Object.keys(CUR).filter(function(x){return x!==c;}).map(function(x){return fmt(conv(a,c,x),x);}).join("  •  ");}
+$("amt").oninput=preview;$("cur").onchange=preview;
+$("add").onclick=function(){var a=parseFloat($("amt").value);if(!(a>0))return;
+S.deps.push({a:a,c:$("cur").value,d:new Date().toISOString(),r:S.rates[$("cur").value]});
+$("amt").value="";$("prev").textContent="";save();render();};
+function del(i){S.deps.splice(i,1);save();render();}
+window.del=del;
+function chart(){var g=S.goalCur,pts=[],sum=0;
+S.deps.forEach(function(x){sum+=conv(x.a,x.c,g);pts.push(sum);});
+if(!pts.length){$("chart").innerHTML='<div class="mut">Faça seu primeiro depósito para ver o gráfico.</div>';return;}
+var W=520,H=210,L=44,R=12,T=14,B=26,max=Math.max(sum,S.goal||0)*1.08,n=pts.length;
+function X(i){return n===1?L+(W-L-R)/2:L+i*(W-L-R)/(n-1);}
+function Y(v){return T+(H-T-B)*(1-v/max);}
+var d=pts.map(function(v,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);}).join(" ");
+var area=d+" L"+X(n-1).toFixed(1)+" "+(H-B)+" L"+X(0).toFixed(1)+" "+(H-B)+"Z";
+var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%"><defs><linearGradient id="gr" x1="0" x2="1"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>';
+for(var k=0;k<=4;k++){var v=max*k/4,y=Y(v);s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="#8884" stroke-width="1"/><text x="'+(L-4)+'" y="'+(y+3)+'" text-anchor="end">'+Math.round(v).toLocaleString("pt-BR")+'</text>';}
+if(S.goal>0)s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(S.goal)+'" y2="'+Y(S.goal)+'" stroke="#7c3aed" stroke-dasharray="5 4" stroke-width="1.5"/><text x="'+(W-R)+'" y="'+(Y(S.goal)-4)+'" text-anchor="end">meta</text>';
+s+='<path d="'+area+'" fill="url(#gr)" opacity=".15"/><path d="'+d+'" fill="none" stroke="url(#gr)" stroke-width="3" stroke-linejoin="round"/>';
+pts.forEach(function(v,i){s+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="4" fill="#7c3aed"/>';});
+s+='<text x="'+L+'" y="'+(H-8)+'">depósito 1</text><text x="'+(W-R)+'" y="'+(H-8)+'" text-anchor="end">depósito '+n+'</text></svg><div class="mut">Acumulado em '+g+'</div>';
+$("chart").innerHTML=s;}
+function render(){var g=S.goalCur,tot=0,by={BRL:0,CLP:0,USD:0,EUR:0};
+S.deps.forEach(function(x){by[x.c]+=x.a;tot+=conv(x.a,x.c,g);});
+var pct=S.goal>0?Math.min(100,tot/S.goal*100):0;
+$("fill").style.width=pct+"%";$("pct").textContent=pct.toFixed(1).replace(".",",")+"%";
+$("left").textContent=S.goal>0?(tot>=S.goal?"Meta atingida! ✈️":"Faltam "+fmt(S.goal-tot,g)):"Defina sua meta acima";
+var parts=Object.keys(by).filter(function(c){return by[c]>0;}).map(function(c){return fmt(by[c],c);});
+$("totals").textContent=parts.length?"Guardado: "+parts.join(" + "):"Nada guardado ainda.";
+$("conv").innerHTML=Object.keys(CUR).map(function(c){var v=0;S.deps.forEach(function(x){v+=conv(x.a,x.c,c);});return '<div class="cv"><span>Total em '+c+'</span><b>'+fmt(v,c)+'</b></div>';}).join("");
+$("list").innerHTML=S.deps.length?S.deps.slice().reverse().map(function(x,j){var i=S.deps.length-1-j;
+return '<div class="it"><span>'+fmt(x.a,x.c)+'<br><span class="mut">'+new Date(x.d).toLocaleDateString("pt-BR")+'</span></span><button class="g" onclick="del('+i+')">remover</button></div>';}).join(""):'<div class="mut">Sem depósitos.</div>';
+$("rdate").textContent=S.rdate;
+chart();}
+render();
+</script>
+</body>
+</html>
